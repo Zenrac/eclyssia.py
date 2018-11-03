@@ -44,8 +44,18 @@ async def triggered(ctx):
 ```
 Generated image<br>
 ```py
-await arcadia.get_image(image_type='triggered', url=TextHere, generate=True)
+await arcadia.get_image(image_type='presidentialalert', url=TextHere, generate=True)
 # With generate=True, url becomes the text displayed on generated images.
+```
+Get BytesIO instead of discord.File<br>
+```py
+file = await arcadia.get_image(image_type='triggered', url=URLHERE, discordfile=False)
+# file type is BytesIO instead of discord.File
+```
+Get image variants<br>
+```py
+file = await arcadia.get_image(image_type='triggered', url=URLHERE, type=1)
+# file image is type 1 instead of type 0.
 ```
 ## License
 
