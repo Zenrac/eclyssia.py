@@ -7,3 +7,7 @@ class Forbidden(Exception):
 
 class NotFound(Exception):
     pass
+
+
+class InvalidEndPoint(Exception):
+    pass

@@ -3,7 +3,7 @@
 import aiohttp
 import asyncio
 
-from .errors import NotFound, Forbidden
+from .errors import NotFound, Forbidden, InvalidEndPoint
 
 try:
     import discord
@@ -26,6 +26,8 @@ class Client:
         self.url = "https://arcadia-api.xyz/api/v1"
         self._loop = loop or asyncio.get_event_loop()
         self.session = aiohttp.ClientSession(loop=self.loop)
+        self._loop.create_task(self.get_endpoints())
+        self.endpoints = []
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
@@ -51,7 +53,17 @@ class Client:
         bot.arcadia = cls(token, bot=bot, *args, **kwargs)
         return bot.arcadia
 
-    async def get_image(self, image_type: str, url: str, type: int = 0, discordfile: bool = True, generate: bool = False):
+    async def get_endpoints(self):
+        try:
+            async with self.session.get(self.url) as response:
+                json = await response.json()
+                self.endpoints = json['endpoints']
+                await response.release()
+                return json['endpoints']
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            pass
+
+    async def get_image(self, image_type: str, url: str, type: int = 0, discordfile: bool = True, generate: bool = False, timeout: int = 300):
         """
         Basic get_image function using aiohttp
 
@@ -72,16 +84,23 @@ class Client:
         generate : bool, default to False
             If enabled, the parameters called 'url' becomes 'text', allows to get generated image from an endpoint.
 
+        timeout : int, default to 300
+            Time before the request is canceled if there is no answer.
         """
+        if self.endpoints and image_type not in self.endpoints:
+            raise InvalidEndPoint('This is not a valid endpoint, please see the list of available endpoints on arcadia-api.xyz.')
+
         async with self.session.get('{}/{}{}{}{}'.format(self.url, image_type.lower(), '?text=' if generate else '?url=', url,
-                                                         '&type={}'.format(type) if type else ''), headers=self._headers) as response:
+                                                         '&type={}'.format(type) if type else ''), headers=self._headers, timeout=timeout) as response:
             if response.status != 200 and response.status != 403:
                 raise NotFound('This resource does not exist or you are not allowed to access.')
             elif response.status == 403:
                 raise Forbidden('You are not allowed to access this resource.')
             ext = response.content_type.split('/')[-1]
             img = await response.read()
+            await response.release()
+
         if _discord and discordfile:
-            return discord.File(img, filename=f"image.{ext}")
+            return discord.File(img, filename="image.{}".format(ext))
 
         return img
