@@ -26,7 +26,7 @@ Client.pluggable(bot=bot, token="PassWord123")
 
 @bot.command()
 async def triggered(ctx):
-    image = await bot.arcadia.get_image(image_type='triggered', ctx.author.avatar_url)
+    image = await bot.arcadia.get_image(image_type='triggered', url=ctx.author.avatar_url)
     await ctx.send(file=image)
 ```
 Without Pluggable Client<br>
@@ -39,7 +39,7 @@ arcadia = Client(token="PassWord123")
 
 @bot.command()
 async def triggered(ctx):
-    image = await arcadia.get_image(image_type='triggered', ctx.author.avatar_url)
+    image = await arcadia.get_image(image_type='triggered', url=ctx.author.avatar_url)
     await ctx.send(file=image)
 ```
 Generated image<br>
