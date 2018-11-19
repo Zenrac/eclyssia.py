@@ -17,7 +17,7 @@ else:
 
 
 class Client:
-    def __init__(self, token: str = '', bot=None, loop=None):
+    def __init__(self, token: str = '', bot=None, loop=None, aiosession=None):
         self._headers = {
             "User-Agent": "Arcadia.py (GitHub: Zenrac)",
             "Authorization": token
@@ -25,7 +25,7 @@ class Client:
 
         self.url = "https://arcadia-api.xyz/api/v1"
         self._loop = loop or asyncio.get_event_loop()
-        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.session = aiosession if aiosession else aiohttp.ClientSession(loop=self.loop)
         self._loop.create_task(self.get_endpoints())
         self.endpoints = []
 
