@@ -44,8 +44,7 @@ async def triggered(ctx):
 ```
 Generated image<br>
 ```py
-await arcadia.get_image(image_type='presidentialalert', url=TextHere, generate=True)
-# With generate=True, url becomes the text displayed on generated images.
+await arcadia.get_image(image_type='presidentialalert', text=TextHere)
 ```
 Get BytesIO instead of discord.File<br>
 ```py
