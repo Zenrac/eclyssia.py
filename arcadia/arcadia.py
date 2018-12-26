@@ -28,7 +28,7 @@ class Client:
         self.session = aiosession if aiosession else aiohttp.ClientSession(loop=self.loop)
         self.retry = 0
         self.endpoints = []
-        self._loop.create_task(self.get_endpoints())
+        asyncio.ensure_future(self.get_endpoints())
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
