@@ -68,8 +68,8 @@ class Client:
                 await response.release()
         except (aiohttp.ClientError, asyncio.TimeoutError):
             self.retry += 1
-            await asyncio.sleep(max(self.retry*5, 60))
-            await self.get_endpoints
+            await asyncio.sleep(min(self.retry*5, 60))
+            await self.get_endpoints()
 
     async def get_image(self, image_type: str, url: str = None, urlbis: str = None,
         text: str = None, type: int = 0, discordfile: bool = True, timeout: int = 300):
