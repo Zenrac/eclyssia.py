@@ -2,6 +2,7 @@
 
 import aiohttp
 import asyncio
+import logging
 
 from .errors import NotFound, Forbidden, InvalidEndPoint
 
@@ -14,6 +15,8 @@ else:
         _discord = False
     else:
         _discord = True
+
+log = logging.getLogger('arcadia')
 
 
 class Client:
@@ -65,14 +68,17 @@ class Client:
                     for endpoint in json['endpoints'].values():
                         endpoints += endpoint
                     self.endpoints = endpoints
+                log.info("Got list of {} endpoints, arcadia is ready to use.".format(len(self.endpoints)))
                 await response.release()
         except (aiohttp.ClientError, asyncio.TimeoutError):
             self.retry += 1
-            await asyncio.sleep(min(self.retry*5, 60))
+            wait = min(self.retry*5, 60)
+            log.info("Failed to get endpoints, trying again in {}seconds".format(wait))
+            await asyncio.sleep(wait)
             await self.get_endpoints()
 
-    async def get_image(self, image_type: str, url: str = None, urlbis: str = None,
-        text: str = None, type: int = 0, discordfile: bool = True, timeout: int = 300):
+    async def get_image(self, image_type: str, url: str = None, text: str = None,
+                        discordfile: bool = True, timeout: int = 300, **args):
         """
         Basic get_image function using aiohttp
         Returns a Discord File if discordfile parameter is True and discord.py rewrite library is installed.
@@ -101,12 +107,20 @@ class Client:
 
         timeout : int, default to 300
             Time before the request is canceled if there is no answer.
+
+        For other parameters, see https://arcadia-api.xyz/docs
         """
         if self.endpoints and image_type.lower() not in self.endpoints:
-            raise InvalidEndPoint('This is not a valid endpoint, please see the list of available endpoints on arcadia-api.xyz.')
+            raise InvalidEndPoint('This is not a valid endpoint, please see the list of available endpoints on https://arcadia-api.xyz/docs.')
 
-        async with self.session.get('{}/{}{}{}{}'.format(self.url, image_type.lower(), '?url={}'.format(url) if url else '', '{}text={}'.format('&' if url else '?', text) if text else '',
-                                                         '&urlbis={}'.format(urlbis) if urlbis else '','&type={}'.format(type) if type else ''), headers=self._headers, timeout=timeout) as response:
+        url = '{}/{}{}{}'.format(self.url, image_type.lower(), '?url={}'.format(url) if url else '',
+                                 '{}text={}'.format('&' if url else '?', text) if text else '')
+        for p, v in args.items():
+            url += '&{}={}'.format(p, v)
+
+        log.debug("Requesting image from url: {}".format(url))
+
+        async with self.session.get(url, headers=self._headers, timeout=timeout) as response:
             if response.status == 403:
                 raise Forbidden('You are not allowed to access this resource.')
             elif response.status != 200:
