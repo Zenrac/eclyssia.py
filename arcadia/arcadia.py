@@ -57,7 +57,9 @@ class Client:
         bot.arcadia = cls(token, bot=bot, *args, **kwargs)
         return bot.arcadia
 
-    async def get_endpoints(self):
+    async def get_endpoints(self, bypass=False):
+        if self.retry != 0 and not bypass:  # We don't want several loop of this to run
+            return
         try:
             async with self.session.get(self.url) as response:
                 json = await response.json()
@@ -69,16 +71,16 @@ class Client:
                         endpoints += endpoint
                     self.endpoints = endpoints
                 log.info("Got list of {} endpoints, arcadia is ready to use.".format(len(self.endpoints)))
+                self.retry = 0
                 await response.release()
         except (aiohttp.ClientError, asyncio.TimeoutError):
             self.retry += 1
             wait = min(self.retry*5, 60)
             log.info("Failed to get endpoints, trying again in {}seconds".format(wait))
             await asyncio.sleep(wait)
-            await self.get_endpoints()
+            await self.get_endpoints(bypass=True)
 
-    async def get_image(self, image_type: str, url: str = None, text: str = None,
-                        discordfile: bool = True, timeout: int = 300, **args):
+    async def get_image(self, image_type: str, url: str = None, discordfile: bool = True, timeout: int = 300, **args):
         """
         Basic get_image function using aiohttp
         Returns a Discord File if discordfile parameter is True and discord.py rewrite library is installed.
@@ -111,20 +113,28 @@ class Client:
         For other parameters, see https://arcadia-api.xyz/docs
         """
         if self.endpoints and image_type.lower() not in self.endpoints:
-            raise InvalidEndPoint('This is not a valid endpoint, please see the list of available endpoints on https://arcadia-api.xyz/docs.')
+            log.info('Found a not known endpoint, trying to update list of available endpoint.')
+            asyncio.ensure_future(self.get_endpoints())  # In case of infinite loop of try / except better not to await
+            await asyncio.sleep(1)  # Waiting to get_endpoints() to finish with a normal speed connexion
+            if self.endpoints and image_type.lower() not in self.endpoints:
+                raise InvalidEndPoint('This is not a valid endpoint, please see the list of available endpoints on https://arcadia-api.xyz/docs.')
 
-        url = '{}/{}{}{}'.format(self.url, image_type.lower(), '?url={}'.format(url) if url else '',
-                                 '{}text={}'.format('&' if url else '?', text) if text else '')
-        for p, v in args.items():
-            url += '&{}={}'.format(p, v)
+        final_url = '{}/{}'.format(self.url, image_type.lower())
 
-        log.debug("Requesting image from url: {}".format(url))
+        # Allows no kwargs when calling funct by specifying the two most communs
+        # e.g we can do get_image('triggered', 'urlhere.com') without specifying url='urlhere.com'
+        params = {}
+        if url:
+            params['url'] = url
+        params.update(args)
 
-        async with self.session.get(url, headers=self._headers, timeout=timeout) as response:
+        log.debug("Requesting image from url: {}".format(final_url))
+
+        async with self.session.get(final_url, headers=self._headers, params=params, timeout=timeout) as response:
             if response.status == 403:
                 raise Forbidden('You are not allowed to access this resource.')
             elif response.status != 200:
-                raise NotFound('This resource does not exist or you are not allowed to access.')
+                raise NotFound('This resource does not exist or you are not allowed to access. ({})'.format(response.status))
             ext = response.content_type.split('/')[-1]
             img = await response.read()
             await response.release()
