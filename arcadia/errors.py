@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
 
-class Forbidden(Exception):
+class ArcadiaException(Exception):
+    """Allows to catch any Arcadia Exception"""
+
+class Forbidden(ArcadiaException):
     pass
 
 
-class NotFound(Exception):
+class NotFound(ArcadiaException):
     pass
 
 
-class InvalidEndPoint(Exception):
+class InvalidEndPoint(ArcadiaException):
     pass
