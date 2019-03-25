@@ -4,6 +4,7 @@ import aiohttp
 import asyncio
 import logging
 
+from io import BytesIO
 from .errors import NotFound, Forbidden, InvalidEndPoint
 
 try:
@@ -136,7 +137,7 @@ class Client:
             elif response.status != 200:
                 raise NotFound('This resource does not exist or you are not allowed to access. ({})'.format(response.status))
             ext = response.content_type.split('/')[-1]
-            img = await response.read()
+            img = BytesIO(await response.read())
             await response.release()
 
         if _discord and discordfile:
