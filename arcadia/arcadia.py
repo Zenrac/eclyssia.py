@@ -59,11 +59,15 @@ class Client:
         return bot.arcadia
 
     async def get_endpoints(self, bypass=False):
+        """Tries to fetch the available endpoints of the API."""
         if self.retry != 0 and not bypass:  # We don't want several loop of this to run
             return
         try:
             async with self.session.get(self.url) as response:
                 json = await response.json()
+                if not json.get('endpoints', False):
+                    log.info('Failed to get endpoints...')
+                    return 
                 if not isinstance(json['endpoints'], dict):
                     self.endpoints = json['endpoints']
                 else:
