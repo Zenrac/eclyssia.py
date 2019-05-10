@@ -1,5 +1,5 @@
 # arcadia.py
-Python3 Wrapper for [Arcadia-api](https://arcadia-api.xyz/) using [aiohttp](https://github.com/aio-libs/aiohttp)<br>
+Python3 Wrapper for [Eclyssia-api (Arcadia-api)](https://eclyssia-api.tk/) using [aiohttp](https://github.com/aio-libs/aiohttp)<br>
 ## Installation
 ### Using pip
 ```
