@@ -50,7 +50,7 @@ class Client:
             Your Bot client from discord.py
 
         token: str
-            Your token from eclyssia-api.xyz
+            Your token from eclyssia-api.tk
         """
 
         if hasattr(bot, 'arcadia'):
