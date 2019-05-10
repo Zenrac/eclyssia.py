@@ -84,6 +84,9 @@ class Client:
             log.info("Failed to get endpoints, trying again in {}seconds".format(wait))
             await asyncio.sleep(wait)
             await self.get_endpoints(bypass=True)
+        except RuntimeError:
+            log.info('Session is closed... Can\'t fetch information from arcadia.')
+            return  # Session is closed. Useless to try again.
 
     async def get_image(self, image_type: str, url: str = None, discordfile: bool = True, timeout: int = 300, **args):
         """
