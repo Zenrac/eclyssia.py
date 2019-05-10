@@ -27,7 +27,7 @@ class Client:
             "Authorization": token
         }
 
-        self.url = "https://arcadia-api.xyz/api/v1"
+        self.url = "https://eclyssia-api.tk/api/v1"
         self._loop = loop or asyncio.get_event_loop()
         self.session = aiosession if aiosession else aiohttp.ClientSession(loop=self.loop)
         self.retry = 0
@@ -50,7 +50,7 @@ class Client:
             Your Bot client from discord.py
 
         token: str
-            Your token from arcadia-api.xyz
+            Your token from eclyssia-api.xyz
         """
 
         if hasattr(bot, 'arcadia'):
@@ -95,7 +95,7 @@ class Client:
         Parameters
 
         image_type: str
-            A valid image type from the list of available endpoints in the documentation : https://arcadia-api.xyz/
+            A valid image type from the list of available endpoints in the documentation : https://docs.eclyssia-api.tk/
 
         url : str, default to None
             The image url parameter
@@ -115,14 +115,14 @@ class Client:
         timeout : int, default to 300
             Time before the request is canceled if there is no answer.
 
-        For other parameters, see https://arcadia-api.xyz/docs
+        For other parameters, see https://docs.eclyssia-api.tk/
         """
         if self.endpoints and image_type.lower() not in self.endpoints:
             log.info('Found a not known endpoint, trying to update list of available endpoint.')
             asyncio.ensure_future(self.get_endpoints())  # In case of infinite loop of try / except better not to await
             await asyncio.sleep(1)  # Waiting to get_endpoints() to finish with a normal speed connexion
             if self.endpoints and image_type.lower() not in self.endpoints:
-                raise InvalidEndPoint('This is not a valid endpoint, please see the list of available endpoints on https://arcadia-api.xyz/docs.')
+                raise InvalidEndPoint('This is not a valid endpoint, please see the list of available endpoints on https://docs.eclyssia-api.tk/.')
 
         final_url = '{}/{}'.format(self.url, image_type.lower())
 
