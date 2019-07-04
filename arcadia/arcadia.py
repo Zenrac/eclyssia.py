@@ -12,10 +12,7 @@ try:
 except ImportError:
     _discord = False
 else:
-    if discord.__version__ != '1.0.0a':
-        _discord = False
-    else:
-        _discord = True
+    _discord = True
 
 log = logging.getLogger('arcadia')
 
