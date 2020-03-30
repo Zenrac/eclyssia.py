@@ -3,7 +3,7 @@ Python3 Wrapper for [Eclyssia-api (Eclyssia-api)](https://eclyssia-api.tk/) usin
 ## Installation
 ### Using pip
 ```
-pip install pyeclyssia
+pip install eclyssia
 ```
 ### Using git
 ```

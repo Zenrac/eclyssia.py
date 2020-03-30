@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='pyeclyssia',
+    name='eclyssia',
     packages=['eclyssia'],
     version='1.2.0',
     description='An eclyssia-api wrapper built for python3+',
