@@ -26,7 +26,8 @@ class Client:
 
         self.url = "https://eclyssia-api.tk/api/v1"
         self._loop = loop or asyncio.get_event_loop()
-        self.session = aiosession if aiosession else aiohttp.ClientSession(loop=self.loop)
+        self.session = aiosession if aiosession else aiohttp.ClientSession(
+            loop=self.loop)
         self.retry = 0
         self.endpoints = []
         asyncio.ensure_future(self.get_endpoints())
@@ -62,23 +63,25 @@ class Client:
         try:
             async with self.session.get(self.url) as response:
                 json = await response.json()
-                if not json.get('endpoints', False):
+                if not json.get('data', {}).get('endpoints', False):
                     log.info('Failed to get endpoints...')
-                    return 
+                    return
                 if not isinstance(json['endpoints'], dict):
-                    self.endpoints = json['endpoints']
+                    self.endpoints = json['data']['endpoints']
                 else:
                     endpoints = []
-                    for endpoint in json['endpoints'].values():
+                    for endpoint in json['data']['endpoints'].values():
                         endpoints += endpoint
                     self.endpoints = endpoints
-                log.info("Got list of {} endpoints, eclyssia is ready to use.".format(len(self.endpoints)))
+                log.info("Got list of {} endpoints, eclyssia is ready to use.".format(
+                    len(self.endpoints)))
                 self.retry = 0
                 await response.release()
         except (aiohttp.ClientError, asyncio.TimeoutError):
             self.retry += 1
-            wait = min(self.retry*5, 60)
-            log.info("Failed to get endpoints, trying again in {}seconds".format(wait))
+            wait = min(self.retry * 5, 60)
+            log.info(
+                "Failed to get endpoints, trying again in {}seconds".format(wait))
             await asyncio.sleep(wait)
             await self.get_endpoints(bypass=True)
         except RuntimeError:
@@ -118,11 +121,15 @@ class Client:
         For other parameters, see https://docs.eclyssia-api.tk/
         """
         if self.endpoints and image_type.lower() not in self.endpoints:
-            log.info('Found a not known endpoint, trying to update list of available endpoint.')
-            asyncio.ensure_future(self.get_endpoints())  # In case of infinite loop of try / except better not to await
-            await asyncio.sleep(1)  # Waiting to get_endpoints() to finish with a normal speed connexion
+            log.info(
+                'Found a not known endpoint, trying to update list of available endpoint.')
+            # In case of infinite loop of try / except better not to await
+            asyncio.ensure_future(self.get_endpoints())
+            # Waiting to get_endpoints() to finish with a normal speed connexion
+            await asyncio.sleep(1)
             if self.endpoints and image_type.lower() not in self.endpoints:
-                raise InvalidEndPoint('This is not a valid endpoint, please see the list of available endpoints on https://docs.eclyssia-api.tk/.')
+                raise InvalidEndPoint(
+                    'This is not a valid endpoint, please see the list of available endpoints on https://docs.eclyssia-api.tk/.')
 
         final_url = '{}/{}'.format(self.url, image_type.lower())
 
@@ -139,7 +146,8 @@ class Client:
             if response.status == 403:
                 raise Forbidden('You are not allowed to access this resource.')
             elif response.status != 200:
-                raise NotFound('This resource does not exist or you are not allowed to access. ({})'.format(response.status))
+                raise NotFound(
+                    'This resource does not exist or you are not allowed to access. ({})'.format(response.status))
             ext = response.content_type.split('/')[-1]
             img = BytesIO(await response.read())
             await response.release()
