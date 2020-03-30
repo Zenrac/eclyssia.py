@@ -66,7 +66,7 @@ class Client:
                 if not json.get('data', {}).get('endpoints', False):
                     log.info('Failed to get endpoints...')
                     return
-                if not isinstance(json['endpoints'], dict):
+                if not isinstance(json['data']['endpoints'], dict):
                     self.endpoints = json['data']['endpoints']
                 else:
                     endpoints = []
