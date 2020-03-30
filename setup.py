@@ -3,12 +3,12 @@ from setuptools import setup
 setup(
     name='pyeclyssia',
     packages=['eclyssia'],
-    version='1.1.7',
+    version='1.2.0',
     description='An eclyssia-api wrapper built for python3+',
     author='Zenrac',
     author_email='zenrac@outlook.fr',
     url='https://github.com/Zenrac/eclyssia.py',
-    download_url='https://github.com/Zenrac/eclyssia.py/archive/1.1.7.tar.gz',
+    download_url='https://github.com/Zenrac/eclyssia.py/archive/1.2.0.tar.gz',
     keywords=['eclyssia'],
     include_package_data=True,
     install_requires=['aiohttp']
