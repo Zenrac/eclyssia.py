@@ -14,4 +14,4 @@ class NotFound(EclyssiaException):
 
 
 class InvalidEndPoint(EclyssiaException):
-    pass
+    """Exception when the specified endpoint is invalid"""
