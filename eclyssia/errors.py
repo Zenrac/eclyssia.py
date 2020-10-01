@@ -10,7 +10,7 @@ class Forbidden(EclyssiaException):
 
 
 class NotFound(EclyssiaException):
-    pass
+    """Exception when the specified endpoint is not found"""
 
 
 class InvalidEndPoint(EclyssiaException):
