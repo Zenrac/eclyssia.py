@@ -6,7 +6,7 @@ class EclyssiaException(Exception):
 
 
 class Forbidden(EclyssiaException):
-    pass
+    """Forbidden Exception such as a 404"""
 
 
 class NotFound(EclyssiaException):
